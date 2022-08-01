@@ -17,7 +17,7 @@ _days = {
     7: "Domenica"
 }
 
-def dateToString(date: datetime):
+def dateToString(date: datetime) -> str:
     today = datetime.now().date()
     return f"{_days[date.isoweekday()]} {date.day}" if date.date() != today else "Oggi"
 

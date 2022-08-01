@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from modules.helpers import dateToString
 
 
-def program_list(pages: list, day: int=0, page: int=0):
+def program_list(pages: list, day: int=0, page: int=0) -> InlineKeyboardMarkup:
     prevDay = datetime.now() + timedelta(days=day-1)
     nextDay = datetime.now() + timedelta(days=day+1)
     keyboard = []

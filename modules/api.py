@@ -1,7 +1,7 @@
 from requests import get
 from datetime import datetime
 from bs4 import BeautifulSoup
-from modules.Program import Program
+from modules.program import Program
 
 
 class InvalidDayError(Exception):
@@ -14,7 +14,7 @@ class TV8Api:
         self._cache = {}
         self._last_updated = None
 
-    def _requestProgramsList(self, day: int=0) -> list[Program]:
+    def _requestProgramsList(self, day: int=0) -> list:
         # Check if the day is in a valid range
         if day < 0 or day > 7:
             raise InvalidDayError
