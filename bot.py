@@ -43,7 +43,7 @@ def reply(msg):
                                 "/lista: lista dettagliata dei prossimi programmi\n\n"
                                 "Premi /help per avere più informazioni!", parse_mode="HTML")
 
-    if text == "/oggi":
+    elif text == "/oggi":
         programs = [p.prettify() for p in api.getProgramList(end_after=datetime.now())]
         bot.sendMessage(chatId, "📺 <b>LISTA PROGRAMMI DI OGGI</b>\n\n" + "\n\n".join(programs), parse_mode="HTML")
 
