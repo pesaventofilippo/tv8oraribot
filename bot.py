@@ -70,12 +70,13 @@ def reply(msg):
         bot.sendMessage(chatId, "Ciao, sono <b>TV8 Orari Bot</b>! 👋🏻\n"
                                 "Posso aiutarti a visualizzare i programmi di TV8, e quando andranno in onda.\n\n"
                                 "<b>Lista dei comandi</b>:\n"
-                                "- /start - Avvia il bot\n"
-                                "- /oggi - Vedi la lista dei programmi in onda oggi\n"
-                                "- /adesso - Descrizione dettagliata del programma attualmente in onda\n"
-                                "- /lista - Vedi la lista dei prossimi programmi\n"
-                                "- /about - Informazioni sul bot\n"
-                                "- /help - Visualizza questo messaggio"
+                                "/start: Avvia il bot\n"
+                                "/oggi: Vedi la lista dei programmi in onda oggi\n"
+                                "/adesso: Descrizione dettagliata del programma attualmente in 
+onda\n"
+                                "/lista: Vedi la lista dei prossimi programmi\n"
+                                "/about: Informazioni sul bot\n"
+                                "/help: Visualizza questo messaggio"
                                 "", parse_mode="HTML")
 
     elif text.startswith("/broadcast ") and helpers.isAdmin(chatId):
