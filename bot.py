@@ -72,8 +72,7 @@ def reply(msg):
                                 "<b>Lista dei comandi</b>:\n"
                                 "/start: Avvia il bot\n"
                                 "/oggi: Vedi la lista dei programmi in onda oggi\n"
-                                "/adesso: Descrizione dettagliata del programma attualmente in 
-onda\n"
+                                "/adesso: Descrizione dettagliata del programma attualmente in onda\n"
                                 "/lista: Vedi la lista dei prossimi programmi\n"
                                 "/about: Informazioni sul bot\n"
                                 "/help: Visualizza questo messaggio"
