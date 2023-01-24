@@ -1,83 +1,43 @@
-from datetime import datetime
+from datetime import datetime, date
 
 class Program:
-    genre_emojis = {
-            "_default": "📺",
-            "Mondo e Tendenze": {
-                "_default": "🌍",
-                "Documentario": "🎥"
-            },
-            "Informazione": {
-                "_default": "📑",
-                "Notiziario": "📰",
-                "Sport": "🎱"
-            },
-            "Film": {
-                "_default": "🎬"
-            },
-            "Intrattenimento": {
-                "_default": "🍿"
-            },
-            "Sport": {
-                "_default": "🏀",
-                "Motori": "🏎"
-            }
-        }
-
-    def __init__(self, index: int, id: int, genre: str, subgenre: str, thumbnail: str,
-                 duration: int, start_time: str, end_time: str, start_date: datetime,
-                 end_date: datetime, title: str, description: str, is_prima: bool):
-        self.index = index
-        self.id = id
-        self.genre = genre
-        self.subgenre = subgenre
-        self.thumbnail = thumbnail
-        self.duration = duration
-        self.start_time = start_time
-        self.end_time = end_time
-        self.start_date = start_date
-        self.end_date = end_date
+    def __init__(self, title: str, start_datetime: datetime, end_datetime: datetime, thumbnail: str):
         self.title = title
-        self.description = description
-        self.is_prima = is_prima
+        self.start_datetime = start_datetime
+        self.end_datetime = end_datetime
+        self.thumbnail = thumbnail
 
     @classmethod
-    def from_dict(cls, data: dict):
-        start_date = datetime.strptime(data["dateStart"], "%Y-%m-%d %H:%M")
-        end_date = datetime.strptime(data["dateEnd"], "%Y-%m-%d %H:%M")
-        is_prima = str(data["prima"]).lower() == "true"
-        return cls(int(data["index"]), int(data["id"]), data["genre"], data["subgenre"], data["thumbnail"],
-                   int(data["duration"]), data["starttime"], data["endtime"], start_date,
-                   end_date, data["title"], data["description"], is_prima)
-
-    @classmethod
-    def from_div_list(cls, div_list: list):
-        data = {
-            div["class"][0]: div.text
-            for div in div_list
-        }
-        return cls.from_dict(data)
+    def from_dict(cls, data: dict, context_date: date):
+        stttime = data["subtitle"]["text"].split(" - ")[0]
+        endtime = data["subtitle"]["text"].split(" - ")[1]
+        start_datetime = datetime.combine(context_date, datetime.strptime(stttime, "%H:%M").time())
+        end_datetime = datetime.combine(context_date, datetime.strptime(endtime, "%H:%M").time())
+        return cls(
+            title=data["title"]["text"],
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
+            thumbnail=data["image"]["src"]
+        )
 
     def starts_after(self, limit: datetime) -> bool:
-        return self.start_date > limit
+        return self.start_datetime > limit
 
     def ends_after(self, limit: datetime) -> bool:
-        return self.end_date > limit
+        return self.end_datetime > limit
 
-    def short_description(self, max_length: int=70) -> str:
-        desc = self.description
-        if len(desc) > max_length:
-            desc = desc[:max_length - 3] + "..."
-        return desc
+    @property
+    def emoji(self) -> str:
+        return "📺"
 
-    def get_emoji(self) -> str:
-        emoji = self.genre_emojis.get(self.genre, self.genre_emojis["_default"])
-        if type(emoji) is dict:
-            emoji = emoji.get(self.subgenre, emoji["_default"])
-        return emoji
+    @property
+    def start_time(self) -> str:
+        return self.start_datetime.strftime("%H:%M")
 
-    def prettify(self, with_description: bool=True) -> str:
-        pretty = f"{self.get_emoji()} {self.start_time} | <b>{self.title}</b>"
-        if with_description:
-            pretty += f"\n<i>{self.short_description()}</i>"
-        return pretty
+    @property
+    def end_time(self) -> str:
+        return self.end_datetime.strftime("%H:%M")
+
+    @property
+    def pretty_string(self) -> str:
+        return f"{self.emoji} {self.start_time} | <b>{self.title}</b>"

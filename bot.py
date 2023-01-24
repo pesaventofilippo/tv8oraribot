@@ -18,8 +18,8 @@ api = TV8Api()
 
 
 def createProgramsList(day: int=0, page: int=0):
-    plist = api.getProgramList(day=day, end_after=datetime.now(), split_pages=6)
-    programs = [p.prettify() for p in plist[page]]
+    plist = api.getProgramList(day=day, end_after=datetime.now(), split_pages=10)
+    programs = [p.pretty_string for p in plist[page]]
     date = datetime.now() + timedelta(days=day)
 
     text = f"📺 <b>LISTA PROGRAMMI DI {helpers.dateToString(date).upper()}</b>\n" \
@@ -33,7 +33,8 @@ def createProgramsList(day: int=0, page: int=0):
 def reply(msg):
     chatId = msg["chat"]["id"]
     text = msg.get("text", "")
-    user = User.get(chatId=chatId) if User.exists(lambda u: u.chatId == chatId) else User(chatId=chatId)
+    if not User.exists(chatId=chatId):
+        User(chatId=chatId)
 
     if text == "/start":
         bot.sendMessage(chatId, f"Ciao, <b>{msg['from']['first_name']}</b>! 👋\n\n"
@@ -44,14 +45,13 @@ def reply(msg):
                                 "Premi /help per avere più informazioni!", parse_mode="HTML")
 
     elif text == "/oggi":
-        programs = [p.prettify() for p in api.getProgramList(end_after=datetime.now())]
+        programs = [p.pretty_string for p in api.getProgramList(end_after=datetime.now())]
         bot.sendMessage(chatId, "📺 <b>LISTA PROGRAMMI DI OGGI</b>\n\n" + "\n\n".join(programs), parse_mode="HTML")
 
     elif text == "/adesso":
         now = api.getProgramList(end_after=datetime.now())[0]
-        bot.sendMessage(chatId, f"<a href='{now.thumbnail}'>{now.get_emoji()}</a> In onda: <b>{now.title}</b>\n"
-                                f"({now.start_time} - {now.end_time})\n\n"
-                                f"<i>{now.description}</i>", parse_mode="HTML")
+        bot.sendMessage(chatId, f"<a href='{now.thumbnail}'>{now.emoji}</a> In onda: <b>{now.title}</b>\n"
+                                f"({now.start_time} - {now.end_time})", parse_mode="HTML")
 
     elif text == "/lista":
         text, keyboard = createProgramsList()
@@ -80,7 +80,7 @@ def reply(msg):
 
     elif text.startswith("/broadcast ") and helpers.isAdmin(chatId):
         text = text.split(" ", 1)[1]
-        pendingUsers = select(u.chatId for u in User)[:]
+        pendingUsers = select(u.chatId for u in User)
         userCount = len(pendingUsers)
         for u in pendingUsers:
             try:
@@ -90,7 +90,7 @@ def reply(msg):
         bot.sendMessage(chatId, f"📢 Messaggio inviato a {userCount} utenti!")
 
     elif text == "/users" and helpers.isAdmin(chatId):
-        userCount = len(select(u for u in User)[:])
+        userCount = select(u for u in User).count()
         bot.sendMessage(chatId, f"👤 Utenti: <b>{userCount}</b>", parse_mode="HTML")
 
     # Text is not a keyword

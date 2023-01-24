@@ -23,7 +23,7 @@ def program_list(pages: list, day: int=0, page: int=0) -> InlineKeyboardMarkup:
 
     if day == 0:
         day_line = [InlineKeyboardButton(text=f"{dateToString(nextDay)} ⏭", callback_data=f"list#{day+1}.0")]
-    elif day == 7:
+    elif day == 13:
         day_line = [InlineKeyboardButton(text=f"⏮ {dateToString(prevDay)}", callback_data=f"list#{day-1}.0")]
     else:
         day_line = [

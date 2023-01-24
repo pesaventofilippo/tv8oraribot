@@ -1,12 +1,6 @@
 from requests import get
-from datetime import datetime
-from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 from modules.program import Program
-
-
-class InvalidDayError(Exception):
-    def __init__(self):
-        self.message = "The day must be between 0 (today) and 7 (days in the future)"
 
 
 class TV8Api:
@@ -15,12 +9,9 @@ class TV8Api:
         self._last_updated = None
 
     def _requestProgramsList(self, day: int=0) -> list:
-        # Check if the day is in a valid range
-        if day < 0 or day > 7:
-            raise InvalidDayError
-
         # Clear cache if outdated
-        if self._last_updated is None or datetime.now().date() != self._last_updated:
+        now_date = datetime.now().date()
+        if self._last_updated is None or now_date != self._last_updated:
             self._cache = {}
 
         # Check if day is already present in cache
@@ -28,16 +19,16 @@ class TV8Api:
             return self._cache[day]
 
         # Request new data from website
-        page = get(f"https://tv8.it/guidatv/programmi.{day}.html")
-        soup = BeautifulSoup(page.text, "lxml")
-        data_list = soup.find(id="guidatv_GetProgramList")
-        data_list = data_list.find_all("div", {"class": "itemParent"})
+        target = now_date + timedelta(days=day)
+        page = get(f"https://www.tv8.it/api/programming"
+                   f"?from={target.isoformat()}T00:00:00Z"
+                   f"&to={target.isoformat()}T23:59:59Z")
+        data = page.json()
 
         programs = []
         last_stime = ""
-        for data in data_list:
-            div_list = data.findChildren("div")
-            p = Program.from_div_list(div_list)
+        for prog_info in data:
+            p = Program.from_dict(data=prog_info, context_date=target)
 
             # Remove all programs of the next day (the website returns duplicates)
             if p.start_time < last_stime: break
@@ -47,7 +38,7 @@ class TV8Api:
 
         # Cache retrieved data and return
         self._cache[day] = programs
-        self._last_updated = datetime.now().date()
+        self._last_updated = now_date
         return programs
 
     def getProgramList(self, *, day: int=0, end_after: datetime=None, split_pages: int=None) -> list:
