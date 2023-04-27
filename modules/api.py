@@ -137,8 +137,8 @@ class TV8Api:
 
     def _requestProgramsList(self, day: int=0) -> list[Program]:
         # Clear cache if outdated
-        now_date = datetime.now().date()
-        if self._last_updated is None or now_date != self._last_updated:
+        now = datetime.now()
+        if self._last_updated is None or now.date() != self._last_updated:
             self._cache = {}
 
         # Check if day is already present in cache
@@ -146,29 +146,24 @@ class TV8Api:
             return self._cache[day]
 
         # Request new data from website
-        target = now_date + timedelta(days=day)
+        target = now + timedelta(days=day)
+        startd = target.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(pytz.timezone("Europe/Rome"))
+        startd = startd.astimezone(pytz.utc).replace(tzinfo=None)
+        endd = target.replace(hour=23, minute=59, second=59, microsecond=0).astimezone(pytz.timezone("Europe/Rome"))
+        endd = endd.astimezone(pytz.utc).replace(tzinfo=None)
         page = get(f"https://www.tv8.it/api/programming"
-                   f"?from={target.isoformat()}T00:00:00Z"
-                   f"&to={target.isoformat()}T23:59:59Z")
+                   f"?from={startd.isoformat()}Z"
+                   f"&to={endd.isoformat()}Z")
         data = page.json()
 
         if not data.get("events"):
             return []
 
-        programs = []
-        last_stime = ""
-        for prog_info in data["events"]:
-            p = Program.from_dict(data=prog_info)
-
-            # Remove all programs of the next day (the website returns duplicates)
-            if p.start_time < last_stime: break
-            last_stime = p.start_time
-
-            programs.append(p)
+        programs = [Program.from_dict(data=prog_info) for prog_info in data["events"]]
 
         # Cache retrieved data and return
         self._cache[day] = programs
-        self._last_updated = now_date
+        self._last_updated = now.date()
         return programs
 
     def getProgramList(self, *, day: int=0, end_after: datetime=None, split_pages: int=None) -> list[Program] | list[list[Program]]:

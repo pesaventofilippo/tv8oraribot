@@ -18,7 +18,7 @@ api = TV8Api()
 
 
 def createProgramsList(day: int=0, page: int=0):
-    plist = api.getProgramList(day=day, end_after=datetime.now(), split_pages=6)
+    plist = api.getProgramList(day=day, end_after=datetime.now(), split_pages=5)
     programs = [p.prettify() for p in plist[page]]
     date = datetime.now() + timedelta(days=day)
 
