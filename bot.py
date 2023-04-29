@@ -1,5 +1,5 @@
 from time import sleep
-from telepotpro import Bot
+from telepotpro import Bot, api as tgapi
 from json import load as jsload
 from pony.orm import db_session, select
 from datetime import datetime, timedelta
@@ -12,6 +12,8 @@ from modules import keyboards, helpers
 
 with open(join(dirname(abspath(__file__)), "settings.json")) as settings_file:
     js_settings = jsload(settings_file)
+    if js_settings.get("api_server"):
+        tgapi.set_api_url(js_settings["api_server"])
 
 bot = Bot(js_settings["token"])
 api = TV8Api()
